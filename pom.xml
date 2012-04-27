@@ -51,7 +51,7 @@
                         <configuration>
                             <url>http://cloud.github.com/downloads/dynjs/dynjs</url>
                             <fromFile>ecma-suite.zip</fromFile>
-                            <toDir>${project.build.directory}</toDir>
+                            <toDir>${project.build.directory}/classes</toDir>
                         </configuration>
                     </execution>
                 </executions>
