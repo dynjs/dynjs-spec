@@ -38,22 +38,20 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>wagon-maven-plugin</artifactId>
+                <version>1.0-beta-3</version>
                 <executions>
                     <execution>
+                        <id>download-suite</id>
                         <phase>process-test-resources</phase>
                         <goals>
-                            <goal>run</goal>
+                            <goal>download-single</goal>
                         </goals>
                         <configuration>
-                            <tasks>
-                                <get src="http://cloud.github.com/downloads/dynjs/dynjs/ecma-suite.zip"
-                                     dest="${project.basedir}/target/ecma-suite.zip"
-                                     verbose="false"
-                                     usetimestamp="true"/>
-                                <unzip src="${project.basedir}/target/ecma-suite.zip" dest="target/classes" overwrite="false"/>
-                            </tasks>
+                            <url>http://cloud.github.com/downloads/dynjs/dynjs</url>
+                            <fromFile>ecma-suite.zip</fromFile>
+                            <toDir>${project.build.directory}</toDir>
                         </configuration>
                     </execution>
                 </executions>
