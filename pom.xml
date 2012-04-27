@@ -44,14 +44,31 @@
                 <executions>
                     <execution>
                         <id>download-suite</id>
-                        <phase>process-test-resources</phase>
+                        <phase>generate-test-resources</phase>
                         <goals>
                             <goal>download-single</goal>
                         </goals>
                         <configuration>
                             <url>http://cloud.github.com/downloads/dynjs/dynjs</url>
                             <fromFile>ecma-suite.zip</fromFile>
-                            <toDir>${project.build.directory}/classes</toDir>
+                            <toDir>${project.build.directory}</toDir>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <unzip src="${project.build.directory}/ecma-suite.zip" dest="target/classes" overwrite="false"/>
+                            </tasks>
                         </configuration>
                     </execution>
                 </executions>
