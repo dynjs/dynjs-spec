@@ -48,7 +48,7 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <get src="https://github.com/downloads/dynjs/dynjs/ecma-suite.zip"
+                                <get src="http://cloud.github.com/downloads/dynjs/dynjs/ecma-suite.zip"
                                      dest="${project.basedir}/ecma-suite.zip"
                                      verbose="false"
                                      usetimestamp="true"/>
