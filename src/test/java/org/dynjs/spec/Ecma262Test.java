@@ -41,7 +41,7 @@ public class Ecma262Test {
     }
 
     @Test
-    public void testThisSucker() throws IOException {
+    public void ecma262Tests() throws IOException {
         DynJS dynJS = new DynJS(new DynJSConfig());
         DynThreadContext context = new DynThreadContext();
         FileInputStream is = new FileInputStream(this.file);
