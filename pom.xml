@@ -38,28 +38,41 @@
             <version>2.1</version>
         </dependency>
     </dependencies>
-
+    <profiles>
+        <profile>
+            <id>download-specs</id>
+            <activation>
+                <file>
+                    <missing>target/ecma-suite.zip</missing>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>wagon-maven-plugin</artifactId>
+                        <version>1.0-beta-3</version>
+                        <executions>
+                            <execution>
+                                <id>download-suite</id>
+                                <phase>generate-test-resources</phase>
+                                <goals>
+                                    <goal>download-single</goal>
+                                </goals>
+                                <configuration>
+                                    <url>http://cloud.github.com/downloads/dynjs/dynjs</url>
+                                    <fromFile>ecma-suite.zip</fromFile>
+                                    <toDir>${project.build.directory}</toDir>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>wagon-maven-plugin</artifactId>
-                <version>1.0-beta-3</version>
-                <executions>
-                    <execution>
-                        <id>download-suite</id>
-                        <phase>generate-test-resources</phase>
-                        <goals>
-                            <goal>download-single</goal>
-                        </goals>
-                        <configuration>
-                            <url>http://cloud.github.com/downloads/dynjs/dynjs</url>
-                            <fromFile>ecma-suite.zip</fromFile>
-                            <toDir>${project.build.directory}</toDir>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
