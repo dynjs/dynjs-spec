@@ -49,10 +49,10 @@
                         <configuration>
                             <tasks>
                                 <get src="http://cloud.github.com/downloads/dynjs/dynjs/ecma-suite.zip"
-                                     dest="${project.basedir}/ecma-suite.zip"
+                                     dest="${project.basedir}/target/ecma-suite.zip"
                                      verbose="false"
                                      usetimestamp="true"/>
-                                <unzip src="${project.basedir}/ecma-suite.zip" dest="target/classes" overwrite="false"/>
+                                <unzip src="${project.basedir}/target/ecma-suite.zip" dest="target/classes" overwrite="false"/>
                             </tasks>
                         </configuration>
                     </execution>
