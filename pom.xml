@@ -7,6 +7,11 @@
     <groupId>org.dynjs</groupId>
     <artifactId>dynjs-spec</artifactId>
     <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.dynjs</groupId>
@@ -32,9 +37,7 @@
             <version>2.1</version>
         </dependency>
     </dependencies>
-    <properties>
-        <test262-version>cc38d24f07d7</test262-version>
-    </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -67,7 +70,8 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <unzip src="${project.build.directory}/ecma-suite.zip" dest="target/classes" overwrite="false"/>
+                                <unzip src="${project.build.directory}/ecma-suite.zip" dest="target/classes"
+                                       overwrite="false"/>
                             </tasks>
                         </configuration>
                     </execution>
