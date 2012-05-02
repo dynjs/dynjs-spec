@@ -41,11 +41,16 @@ public class Ecma262Test {
     }
 
     @Test
-    public void ecma262Tests() throws IOException {
+    public void ecma262Tests() throws Exception {
         DynJS dynJS = new DynJS(new DynJSConfig());
         DynThreadContext context = new DynThreadContext();
         FileInputStream is = new FileInputStream(this.file);
-        dynJS.eval(context, is);
-        is.close();
+        try{
+            dynJS.eval(context, is);
+        } catch (Exception e){
+            throw new Exception(file.getName(), e);
+        } finally {
+            is.close();
+        }
     }
 }
