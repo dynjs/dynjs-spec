@@ -1,2 +1,4 @@
 /ecma-suite.zip
 /target
+/.idea
+/*.iml
