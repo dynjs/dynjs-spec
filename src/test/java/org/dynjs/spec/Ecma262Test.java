@@ -29,9 +29,10 @@ public class Ecma262Test {
     }
 
     public static Collection<File> filesToPreload() throws URISyntaxException {
-        return Arrays.asList(new File(Ecma262Test.class.getResource("/harness/cth.js").toURI()),
+        return Arrays.asList(new File(Ecma262Test.class.getResource("/harness/cth.js").toURI())
                 //new File(Ecma262Test.class.getResource("/harness/ed.js").toURI()),
-                new File(Ecma262Test.class.getResource("/harness/framework.js").toURI()));
+//                new File(Ecma262Test.class.getResource("/harness/framework.js").toURI())
+        );
     }
 
 }
