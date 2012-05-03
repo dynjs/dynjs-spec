@@ -9,12 +9,13 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @RunWith(DynJSTestRunner.class)
 public class Ecma262Test {
 
-    private static final List<String> BLACKLIST = Arrays.asList("10.4.2-2-c-1.js");
+    private static final List<String> BLACKLIST = Collections.emptyList();
 
     public static Collection<File> files() throws URISyntaxException {
         final URL resource = Ecma262Test.class.getResource("/suite");
