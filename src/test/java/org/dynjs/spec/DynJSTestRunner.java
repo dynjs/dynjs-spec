@@ -18,16 +18,14 @@ package org.dynjs.spec;
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.DynJSConfig;
 import org.dynjs.runtime.DynThreadContext;
-import org.junit.internal.AssumptionViolatedException;
+import org.dynjs.spec.shims.FailShim;
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
-import org.mockito.internal.matchers.Equals;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -45,6 +43,7 @@ public class DynJSTestRunner extends Runner {
         this.testClass = testClass;
         init();
         DynJSConfig config = new DynJSConfig();
+        config.addBuiltin("$$$fail", new FailShim());
         dynJS = new DynJS(config);
     }
 
@@ -103,4 +102,5 @@ public class DynJSTestRunner extends Runner {
             }
         }
     }
+
 }

@@ -24,13 +24,13 @@ public class Ecma262Test {
                     new AndFileFilter(new SuffixFileFilter("js"),
                             new NotFileFilter(new NameFileFilter(BLACKLIST))),
                     TrueFileFilter.INSTANCE);
-//            return FileUtils.listFiles(new File(resource.toURI()), new String[]{"js"}, true);
         }
         throw new RuntimeException("failed loading test suite");
     }
 
     public static Collection<File> filesToPreload() throws URISyntaxException {
-        return Arrays.asList(new File(Ecma262Test.class.getResource("/harness/cth.js").toURI())
+        return Arrays.asList(new File(Ecma262Test.class.getResource("/harness/cth.js").toURI()),
+                new File(Ecma262Test.class.getResource("/harness/sta-lite.js").toURI())
                 //new File(Ecma262Test.class.getResource("/harness/ed.js").toURI()),
 //                new File(Ecma262Test.class.getResource("/harness/framework.js").toURI())
         );
