@@ -1,51 +1,37 @@
 package org.dynjs.spec;
 
 import org.apache.commons.io.FileUtils;
-import org.dynjs.runtime.DynJS;
-import org.dynjs.runtime.DynJSConfig;
-import org.dynjs.runtime.DynThreadContext;
-import org.junit.Test;
+import org.apache.commons.io.filefilter.*;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
-@RunWith(Parameterized.class)
+@RunWith(DynJSTestRunner.class)
 public class Ecma262Test {
 
-    private final File file;
+    private static final List<String> BLACKLIST = Arrays.asList("10.4.2-2-c-1.js");
 
-    public Ecma262Test(File file) {
-        this.file = file;
-    }
-
-    @Parameterized.Parameters
-    public static Collection<Object[]> files() throws URISyntaxException {
-        List<Object[]> list = new LinkedList<Object[]>();
-
+    public static Collection<File> files() throws URISyntaxException {
         final URL resource = Ecma262Test.class.getResource("/suite");
         if (resource.getProtocol().equals("file")) {
-            Collection<File> files = FileUtils.listFiles(new File(resource.toURI()), new String[]{"js"}, true);
-            for (File file : files) {
-                list.add(new Object[]{file});
-            }
+            return FileUtils.listFiles(new File(resource.toURI()),
+                    new AndFileFilter(new SuffixFileFilter("js"),
+                            new NotFileFilter(new NameFileFilter(BLACKLIST))),
+                    TrueFileFilter.INSTANCE);
+//            return FileUtils.listFiles(new File(resource.toURI()), new String[]{"js"}, true);
         }
-        return list;
+        throw new RuntimeException("failed loading test suite");
     }
 
-    @Test
-    public void ecma262Tests() throws IOException {
-        DynJS dynJS = new DynJS(new DynJSConfig());
-        DynThreadContext context = new DynThreadContext();
-        FileInputStream is = new FileInputStream(this.file);
-        dynJS.eval(context, is);
-        is.close();
+    public static Collection<File> filesToPreload() throws URISyntaxException {
+        return Arrays.asList(new File(Ecma262Test.class.getResource("/harness/cth.js").toURI()),
+                //new File(Ecma262Test.class.getResource("/harness/ed.js").toURI()),
+                new File(Ecma262Test.class.getResource("/harness/framework.js").toURI()));
     }
+
 }
