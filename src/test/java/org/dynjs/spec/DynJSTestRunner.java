@@ -85,6 +85,7 @@ public class DynJSTestRunner extends Runner {
                     }
                 } catch (Exception e) {
                     notifier.fireTestFailure(new Failure(description, e));
+                    continue;
                 }
                 testFile = new FileInputStream(file);
                 dynJS.eval(context, testFile);
