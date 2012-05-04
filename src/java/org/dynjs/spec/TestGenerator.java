@@ -8,6 +8,13 @@ public class TestGenerator {
     private final static String SUITE_DIRECTORY = "test/resources/suite";
 
     public static void main(String[] args){
+        File suiteDirectory = new File(SUITE_DIRECTORY);
+
+        if(!suiteDirectory.exists()) {
+            System.out.println("Creating " + suiteDirectory);
+            suiteDirectory.mkdir();
+        }
+
         traverse(new File(SUITE_DIRECTORY));
     }
 
@@ -23,5 +30,6 @@ public class TestGenerator {
 
     private static void generate(String fileName) {
         System.out.println("Generate stuff to " + fileName);
+        File testFile = new File(SUITE_DIRECTORY + "/" + fileName);
     }
 }
