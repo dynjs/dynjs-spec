@@ -79,7 +79,7 @@ public class DynJSTestRunner extends Runner {
                 try {
                     for (File fileToPreload : filesToPreload) {
                         FileInputStream stream = new FileInputStream(fileToPreload);
-                        dynJS.eval(context, stream);
+                        dynJS.eval(context, stream, file.getName());
                         stream.close();
                     }
                 } catch (Exception e) {
