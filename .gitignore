@@ -1,2 +1,7 @@
 /ecma-suite.zip
 /target
+
+# IDE support files
+.classpath
+.project
+.settings
