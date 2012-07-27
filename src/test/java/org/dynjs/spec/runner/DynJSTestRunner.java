@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.dynjs.spec;
+package org.dynjs.spec.runner;
 
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.DynJSConfig;
@@ -27,6 +27,7 @@ import org.junit.runner.notification.RunNotifier;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,10 +59,11 @@ public class DynJSTestRunner extends Runner {
 
     private void init() {
         try {
-            Method getFiles = testClass.getDeclaredMethod("files");
-            this.files = (Collection<File>) getFiles.invoke(null);
-            Method getFilesToPreload = testClass.getDeclaredMethod("filesToPreload");
-            this.filesToPreload = (Collection<File>) getFilesToPreload.invoke(null);
+        	Constructor<?> constructor = testClass.getConstructor(null);
+        	Object folderRunner = constructor.newInstance();
+            Method getFiles = testClass.getMethod("files", null);
+            this.files = (Collection<File>) getFiles.invoke(folderRunner, null);
+            this.filesToPreload = JSFileUtils.listPreloadFiles();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -72,7 +74,6 @@ public class DynJSTestRunner extends Runner {
         for (File file : files) {
             final Description description = Description.createTestDescription(testClass, file.getName());
             notifier.fireTestStarted(description);
-            final Boolean result;
             InputStream testFile = null;
             try {
                 DynThreadContext context = new DynThreadContext();
