@@ -2,8 +2,8 @@ package org.dynjs.spec;
 
 import org.dynjs.spec.runner.FolderRunner;
 
-public class Ch10 extends FolderRunner {
-	public Ch10() {
+public class Ch10Test extends FolderRunner {
+	public Ch10Test() {
 		super("ch10");
 	}
 }
