@@ -7,11 +7,11 @@ import java.util.Collection;
 import org.junit.runner.RunWith;
 
 @RunWith(DynJSTestRunner.class)
-public class FolderRunner {
+public class DynJSTest {
 
 	private String folderName;
 
-	public FolderRunner(String folderName) {
+	public DynJSTest(String folderName) {
 		this.folderName = folderName;
 	}
 
