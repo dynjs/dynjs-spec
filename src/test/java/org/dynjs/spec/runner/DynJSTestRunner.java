@@ -15,9 +15,12 @@
  */
 package org.dynjs.spec.runner;
 
+import org.dynjs.Config;
+import org.dynjs.runtime.AbstractFunction;
 import org.dynjs.runtime.DynJS;
-import org.dynjs.runtime.DynJSConfig;
-import org.dynjs.runtime.DynThreadContext;
+import org.dynjs.runtime.ExecutionContext;
+import org.dynjs.runtime.GlobalObject;
+import org.dynjs.runtime.GlobalObjectFactory;
 import org.dynjs.spec.shims.FailShim;
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
@@ -43,8 +46,15 @@ public class DynJSTestRunner extends Runner {
     public DynJSTestRunner(Class<?> testClass) {
         this.testClass = testClass;
         init();
-        DynJSConfig config = new DynJSConfig();
-        config.addBuiltin("$$$fail", new FailShim());
+        Config config = new Config();
+        config.setGlobalObjectFactory(new GlobalObjectFactory() {
+            @Override
+            public GlobalObject newGlobalObject(DynJS runtime) {
+                final GlobalObject global = new GlobalObject(runtime);
+                global.defineGlobalProperty("$$$fail", new FailShim(global));
+                return global;
+            }
+        });
         dynJS = new DynJS(config);
     }
 
@@ -74,13 +84,14 @@ public class DynJSTestRunner extends Runner {
         for (File file : files) {
             final Description description = Description.createTestDescription(testClass, file.getName());
             notifier.fireTestStarted(description);
-            InputStream testFile = null;
+            FileInputStream testFile = null;
             try {
-                DynThreadContext context = new DynThreadContext();
+
+
                 try {
                     for (File fileToPreload : filesToPreload) {
                         FileInputStream stream = new FileInputStream(fileToPreload);
-                        dynJS.eval(context, stream, file.getName());
+                        dynJS.execute(stream, file.getName());
                         stream.close();
                     }
                 } catch (Exception e) {
@@ -88,8 +99,7 @@ public class DynJSTestRunner extends Runner {
                     continue;
                 }
                 testFile = new FileInputStream(file);
-                dynJS.eval(context, testFile);
-                dynJS.getCapturedScopeStore().clear();
+                dynJS.execute(testFile, file.getName());
                 notifier.fireTestFinished(description);
             } catch (Throwable e) {
                 notifier.fireTestFailure(new Failure(description, e));

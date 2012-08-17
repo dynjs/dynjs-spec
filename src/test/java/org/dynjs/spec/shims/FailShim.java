@@ -1,18 +1,18 @@
 package org.dynjs.spec.shims;
 
-import org.dynjs.api.Function;
 import org.dynjs.exception.DynJSException;
-import org.dynjs.runtime.DynThreadContext;
+import org.dynjs.runtime.AbstractNativeFunction;
+import org.dynjs.runtime.ExecutionContext;
+import org.dynjs.runtime.GlobalObject;
 
-public class FailShim implements Function {
+public class FailShim extends AbstractNativeFunction {
 
-    @Override
-    public Object call(Object self, DynThreadContext context, Object... args) {
-        throw new DynJSException(args.length == 1 ? args[0].toString() : "failed");
+    public FailShim(GlobalObject globalObject) {
+        super(globalObject, "message");
     }
 
     @Override
-    public String[] getParameters() {
-        return new String[]{"message"};
+    public Object call(ExecutionContext context, Object self, Object... args) {
+        throw new DynJSException(args.length == 1 ? args[0].toString() : "failed");
     }
 }
