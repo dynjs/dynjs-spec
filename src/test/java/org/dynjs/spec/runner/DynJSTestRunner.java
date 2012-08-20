@@ -16,9 +16,7 @@
 package org.dynjs.spec.runner;
 
 import org.dynjs.Config;
-import org.dynjs.runtime.AbstractFunction;
 import org.dynjs.runtime.DynJS;
-import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
 import org.dynjs.runtime.GlobalObjectFactory;
 import org.dynjs.spec.shims.FailShim;
@@ -29,15 +27,12 @@ import org.junit.runner.notification.RunNotifier;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 
 public class DynJSTestRunner extends Runner {
-
-    private DynJS dynJS;
 
     private final Class<?> testClass;
     private Collection<File> files = new ArrayList<>();
@@ -46,16 +41,7 @@ public class DynJSTestRunner extends Runner {
     public DynJSTestRunner(Class<?> testClass) {
         this.testClass = testClass;
         init();
-        Config config = new Config();
-        config.setGlobalObjectFactory(new GlobalObjectFactory() {
-            @Override
-            public GlobalObject newGlobalObject(DynJS runtime) {
-                final GlobalObject global = new GlobalObject(runtime);
-                global.defineGlobalProperty("$$$fail", new FailShim(global));
-                return global;
-            }
-        });
-        dynJS = new DynJS(config);
+
     }
 
     @Override
@@ -69,8 +55,8 @@ public class DynJSTestRunner extends Runner {
 
     private void init() {
         try {
-        	Constructor<?> constructor = testClass.getConstructor(null);
-        	Object folderRunner = constructor.newInstance();
+            Constructor<?> constructor = testClass.getConstructor(null);
+            Object folderRunner = constructor.newInstance();
             Method getFiles = testClass.getMethod("files", null);
             this.files = (Collection<File>) getFiles.invoke(folderRunner, null);
             this.filesToPreload = JSFileUtils.listPreloadFiles();
@@ -87,7 +73,7 @@ public class DynJSTestRunner extends Runner {
             FileInputStream testFile = null;
             try {
 
-
+                DynJS dynJS = createDynJSRuntime();
                 try {
                     for (File fileToPreload : filesToPreload) {
                         FileInputStream stream = new FileInputStream(fileToPreload);
@@ -113,6 +99,19 @@ public class DynJSTestRunner extends Runner {
                 }
             }
         }
+    }
+
+    private DynJS createDynJSRuntime() {
+        Config config = new Config();
+        config.setGlobalObjectFactory(new GlobalObjectFactory() {
+            @Override
+            public GlobalObject newGlobalObject(DynJS runtime) {
+                final GlobalObject global = new GlobalObject(runtime);
+                global.defineGlobalProperty("$$$fail", new FailShim(global));
+                return global;
+            }
+        });
+        return new DynJS(config);
     }
 
 }
