@@ -56,7 +56,6 @@
                 <version>2.12</version>
                 <configuration>
                     <argLine>-XX:MaxPermSize=200m</argLine>
-                    <parallel>both</parallel>
                 </configuration>
             </plugin>
         </plugins>
