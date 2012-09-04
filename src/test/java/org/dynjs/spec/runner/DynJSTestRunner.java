@@ -15,14 +15,6 @@
  */
 package org.dynjs.spec.runner;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-
 import org.dynjs.Config;
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.GlobalObject;
@@ -36,8 +28,23 @@ import org.junit.runner.manipulation.NoTestsRemainException;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 public class DynJSTestRunner extends Runner implements Filterable {
 
+    public static final int TIMEOUT_IN_SECONDS = 30;
     private final Class<?> testClass;
     private Collection<File> files = new ArrayList<>();
     private Collection<File> filesToPreload;
@@ -73,13 +80,13 @@ public class DynJSTestRunner extends Runner implements Filterable {
 
     @Override
     public void run(RunNotifier notifier) {
-        for (File file : files) {
+        final ExecutorService service = Executors.newSingleThreadExecutor();
+        for (final File file : files) {
             final Description description = Description.createTestDescription(testClass, file.getName());
             notifier.fireTestStarted(description);
             FileInputStream testFile = null;
             try {
-
-                DynJS dynJS = createDynJSRuntime();
+                final DynJS dynJS = createDynJSRuntime();
                 try {
                     for (File fileToPreload : filesToPreload) {
                         FileInputStream stream = new FileInputStream(fileToPreload);
@@ -92,7 +99,13 @@ public class DynJSTestRunner extends Runner implements Filterable {
                 }
                 testFile = new FileInputStream(file);
                 System.err.println(">>>> " + file.getName());
-                dynJS.execute(testFile, file.getName());
+                final Future<Object> future = service.submit(new TestTask(dynJS, testFile, file));
+                try {
+                    future.get(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+                } catch (TimeoutException e) {
+                    future.cancel(true);
+                    throw e;
+                }
                 notifier.fireTestFinished(description);
             } catch (Throwable e) {
                 System.err.println(e.getMessage());
@@ -108,6 +121,7 @@ public class DynJSTestRunner extends Runner implements Filterable {
                 }
             }
         }
+        service.shutdown();
     }
 
     private DynJS createDynJSRuntime() {
@@ -127,13 +141,31 @@ public class DynJSTestRunner extends Runner implements Filterable {
     public void filter(Filter filter) throws NoTestsRemainException {
         // System.err.println( "filtering with : " + filter.describe() );
         Iterator<File> fileIter = this.files.iterator();
-        
-        while ( fileIter.hasNext() ) {
+
+        while (fileIter.hasNext()) {
             File file = fileIter.next();
             Description child = Description.createTestDescription(testClass, file.getName());
-            if ( ! filter.shouldRun( child ) ) {
+            if (!filter.shouldRun(child)) {
                 fileIter.remove();
             }
+        }
+    }
+
+    private static class TestTask implements Callable<Object> {
+        private final DynJS dynJS;
+        private final FileInputStream testFile;
+        private final File file;
+
+        public TestTask(DynJS dynJS, FileInputStream testFile, File file) {
+            this.dynJS = dynJS;
+            this.testFile = testFile;
+            this.file = file;
+        }
+
+        @Override
+        public Object call() throws Exception {
+            dynJS.execute(testFile, file.getName());
+            return null;
         }
     }
 }
