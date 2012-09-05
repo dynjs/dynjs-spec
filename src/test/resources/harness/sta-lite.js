@@ -170,3 +170,6 @@ function accessorPropertyAttributesAreCorrect(obj,
 
     return attributesCorrect;
 }
+
+var NotEarlyErrorString = "NotEarlyError";
+var NotEarlyError = new Error(NotEarlyErrorString);

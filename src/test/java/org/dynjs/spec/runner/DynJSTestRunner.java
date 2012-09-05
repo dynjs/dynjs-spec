@@ -15,6 +15,24 @@
  */
 package org.dynjs.spec.runner;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.regex.Pattern;
+
 import org.dynjs.Config;
 import org.dynjs.runtime.DynJS;
 import org.dynjs.runtime.GlobalObject;
@@ -27,20 +45,6 @@ import org.junit.runner.manipulation.Filterable;
 import org.junit.runner.manipulation.NoTestsRemainException;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 public class DynJSTestRunner extends Runner implements Filterable {
 
@@ -108,8 +112,27 @@ public class DynJSTestRunner extends Runner implements Filterable {
                 }
                 notifier.fireTestFinished(description);
             } catch (Throwable e) {
-                System.err.println(e.getMessage());
-                notifier.fireTestFailure(new Failure(description, e));
+                try {
+                    NegativeExpectation negativeExpectation = getNegativeExpectation(file);
+                    if (negativeExpectation == null) {
+                        System.err.println(e.getMessage());
+                        notifier.fireTestFailure(new Failure(description, e));
+                    } else {
+                        if (negativeExpectation.expectation == null) {
+                            notifier.fireTestFinished(description);
+                        } else {
+                            String msg = e.getMessage();
+                            if (Pattern.matches(".*" + negativeExpectation.expectation + ".*", msg)) {
+                                notifier.fireTestFinished(description);
+                            } else {
+                                System.err.println(e.getMessage());
+                                notifier.fireTestFailure(new Failure(description, e));
+                            }
+                        }
+                    }
+                } catch (IOException ioe) {
+                    // ignore
+                }
             } finally {
                 System.err.println("<<<< " + file.getName());
                 try {
@@ -122,6 +145,35 @@ public class DynJSTestRunner extends Runner implements Filterable {
             }
         }
         service.shutdown();
+    }
+
+    private NegativeExpectation getNegativeExpectation(File file) throws IOException {
+        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+        try {
+            String line = null;
+
+            while ((line = in.readLine()) != null) {
+                int negLoc = line.indexOf("@negative");
+                if (negLoc >= 0) {
+                    NegativeExpectation neg = new NegativeExpectation();
+                    String expectation = line.substring(negLoc + 9).trim();
+                    if (!expectation.equals("")) {
+                        neg.expectation = expectation;
+                    }
+                    return neg;
+                }
+
+            }
+        } finally {
+            in.close();
+        }
+
+        return null;
+
+    }
+
+    private static class NegativeExpectation {
+        public String expectation = null;
     }
 
     private DynJS createDynJSRuntime() {
