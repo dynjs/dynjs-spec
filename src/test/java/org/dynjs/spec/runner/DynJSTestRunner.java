@@ -61,7 +61,6 @@ public class DynJSTestRunner extends Runner implements Filterable {
 
     @Override
     public Description getDescription() {
-        System.err.println("getDesc");
         final Description description = Description.createSuiteDescription(testClass);
         for (File file : files) {
             Description child = Description.createTestDescription(testClass, file.getName());

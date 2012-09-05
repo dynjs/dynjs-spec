@@ -17,7 +17,7 @@ function $ERROR(message) {
 //
 function runTestCase(testcase) {
     var x = testcase();
-    print(x);
+    //print(x);
 }
 
 var __globalObject = Function("return this;")();
