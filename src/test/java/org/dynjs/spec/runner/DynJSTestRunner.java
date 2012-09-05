@@ -89,90 +89,121 @@ public class DynJSTestRunner extends Runner implements Filterable {
             notifier.fireTestStarted(description);
             FileInputStream testFile = null;
             try {
-                final DynJS dynJS = createDynJSRuntime();
+                TestDescriptor descriptor = getTestDescriptor(file);
                 try {
-                    for (File fileToPreload : filesToPreload) {
-                        FileInputStream stream = new FileInputStream(fileToPreload);
-                        dynJS.execute(stream, file.getName());
-                        stream.close();
-                    }
-                } catch (Exception e) {
-                    notifier.fireTestFailure(new Failure(description, e));
-                    continue;
-                }
-                testFile = new FileInputStream(file);
-                System.err.println(">>>> " + file.getName());
-                final Future<Object> future = service.submit(new TestTask(dynJS, testFile, file));
-                try {
-                    future.get(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
-                } catch (TimeoutException e) {
-                    future.cancel(true);
-                    throw e;
-                }
-                notifier.fireTestFinished(description);
-            } catch (Throwable e) {
-                try {
-                    NegativeExpectation negativeExpectation = getNegativeExpectation(file);
-                    if (negativeExpectation == null) {
-                        System.err.println(e.getMessage());
+                    final DynJS dynJS = createDynJSRuntime();
+                    try {
+                        for (File fileToPreload : filesToPreload) {
+                            FileInputStream stream = new FileInputStream(fileToPreload);
+                            dynJS.execute(stream, file.getName());
+                            stream.close();
+                        }
+                    } catch (Exception e) {
                         notifier.fireTestFailure(new Failure(description, e));
+                        descriptor.passed = false;
+                        descriptor.error = e;
+                        continue;
+                    }
+                    testFile = new FileInputStream(file);
+                    final Future<Object> future = service.submit(new TestTask(dynJS, testFile, file, descriptor.onlyStrict));
+                    try {
+                        future.get(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+                    } catch (TimeoutException e) {
+                        future.cancel(true);
+                        throw e;
+                    }
+                    notifier.fireTestFinished(description);
+                    descriptor.passed = true;
+                } catch (Throwable e) {
+                    if (!descriptor.isNegative) {
+                        notifier.fireTestFailure(new Failure(description, e));
+                        descriptor.passed = false;
+                        descriptor.error = e;
                     } else {
-                        if (negativeExpectation.expectation == null) {
+                        if (descriptor.negativeExpectation == null) {
                             notifier.fireTestFinished(description);
+                            descriptor.passed = true;
                         } else {
                             String msg = e.getMessage();
-                            if (Pattern.matches(".*" + negativeExpectation.expectation + ".*", msg)) {
+                            if (Pattern.matches(".*" + descriptor.negativeExpectation + ".*", msg)) {
                                 notifier.fireTestFinished(description);
+                                descriptor.passed = true;
                             } else {
                                 System.err.println(e.getMessage());
                                 notifier.fireTestFailure(new Failure(description, e));
+                                descriptor.passed = false;
+                                descriptor.error = e;
                             }
                         }
                     }
-                } catch (IOException ioe) {
-                    // ignore
-                }
-            } finally {
-                System.err.println("<<<< " + file.getName());
-                try {
-                    if (testFile != null) {
-                        testFile.close();
+                } finally {
+                    System.err.println((descriptor.passed ? "PASS" : "FAIL") + " | " + String.format("%14s", file.getName()) + " | " + descriptor.description );
+                    if (!descriptor.passed && descriptor.error != null) {
+                        System.err.println("    " + descriptor.error.getMessage());
                     }
-                } catch (Throwable e) {
-                    notifier.fireTestFailure(new Failure(description, e));
+                    try {
+                        if (testFile != null) {
+                            testFile.close();
+                        }
+                    } catch (Throwable e) {
+                        notifier.fireTestFailure(new Failure(description, e));
+                        descriptor.passed = false;
+                        descriptor.error = e;
+                    }
                 }
+            } catch (IOException ioe) {
+                notifier.fireTestFailure(new Failure(description, ioe));
             }
         }
         service.shutdown();
     }
 
-    private NegativeExpectation getNegativeExpectation(File file) throws IOException {
+    private TestDescriptor getTestDescriptor(File file) throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+        TestDescriptor descriptor = new TestDescriptor();
         try {
             String line = null;
 
             while ((line = in.readLine()) != null) {
                 int negLoc = line.indexOf("@negative");
                 if (negLoc >= 0) {
-                    NegativeExpectation neg = new NegativeExpectation();
+                    descriptor.isNegative = true;
                     String expectation = line.substring(negLoc + 9).trim();
                     if (!expectation.equals("")) {
-                        neg.expectation = expectation;
+                        descriptor.negativeExpectation = expectation;
                     }
-                    return neg;
+                }
+                int onlyStrict = line.indexOf("@onlyStrict");
+                if (onlyStrict >= 0) {
+                    descriptor.onlyStrict = true;
                 }
 
+                int noStrict = line.indexOf("@noStrict");
+                if (noStrict >= 0) {
+                    descriptor.noStrict = true;
+                }
+
+                int description = line.indexOf("@description");
+                if (description >= 0) {
+                    descriptor.description = line.substring(description + 12).trim();
+                }
             }
         } finally {
             in.close();
         }
 
-        return null;
+        return descriptor;
 
     }
 
-    private static class NegativeExpectation {
-        public String expectation = null;
+    private static class TestDescriptor {
+        public String description = null;
+        public boolean onlyStrict = false;
+        public boolean noStrict = false;
+        public boolean isNegative = false;
+        public String negativeExpectation = null;
+        public boolean passed = false;
+        public Throwable error = null;
     }
 
     private DynJS createDynJSRuntime() {
@@ -206,16 +237,18 @@ public class DynJSTestRunner extends Runner implements Filterable {
         private final DynJS dynJS;
         private final FileInputStream testFile;
         private final File file;
+        private boolean forceStrict;
 
-        public TestTask(DynJS dynJS, FileInputStream testFile, File file) {
+        public TestTask(DynJS dynJS, FileInputStream testFile, File file, boolean forceStrict) {
             this.dynJS = dynJS;
             this.testFile = testFile;
             this.file = file;
+            this.forceStrict = forceStrict;
         }
 
         @Override
         public Object call() throws Exception {
-            dynJS.execute(testFile, file.getName());
+            dynJS.execute(testFile, file.getName(), forceStrict);
             return null;
         }
     }
