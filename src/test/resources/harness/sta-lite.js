@@ -16,8 +16,9 @@ function $FAIL(message) {
 }
 
 function runTestCase(testcase) {
-    var x = testcase();
-    //print(x);
+    if (testcase() !== true) {
+        $ERROR("Test case returned non-true value!");
+    }
 }
 
 var __globalObject = Function("return this;")();
