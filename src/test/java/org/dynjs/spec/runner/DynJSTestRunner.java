@@ -48,7 +48,7 @@ import org.junit.runner.notification.RunNotifier;
 
 public class DynJSTestRunner extends Runner implements Filterable {
 
-    public static final int TIMEOUT_IN_SECONDS = 30;
+    public static final int TIMEOUT_IN_SECONDS = 15;
     private final Class<?> testClass;
     private Collection<File> files = new ArrayList<>();
     private Collection<File> filesToPreload;
@@ -105,6 +105,7 @@ public class DynJSTestRunner extends Runner implements Filterable {
                         continue;
                     }
                     testFile = new FileInputStream(file);
+                    System.err.print(String.format("%-25s", file.getName()) + " | ");
                     final Future<Object> future = service.submit(new TestTask(dynJS, testFile, file, descriptor.onlyStrict));
                     try {
                         future.get(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
@@ -129,7 +130,7 @@ public class DynJSTestRunner extends Runner implements Filterable {
                                 notifier.fireTestFinished(description);
                                 descriptor.passed = true;
                             } else {
-                                System.err.println(e.getMessage());
+                                // System.err.println(e.getMessage());
                                 notifier.fireTestFailure(new Failure(description, e));
                                 descriptor.passed = false;
                                 descriptor.error = e;
@@ -137,8 +138,9 @@ public class DynJSTestRunner extends Runner implements Filterable {
                         }
                     }
                 } finally {
-                    System.err.println((descriptor.passed ? "PASS" : "FAIL") + " | " + String.format("%14s", file.getName()) + " | " + descriptor.description );
-                    if (!descriptor.passed && descriptor.error != null) {
+                    boolean wasTimeout = (descriptor.passed == false && (descriptor.error instanceof TimeoutException));
+                    System.err.println((descriptor.passed ? "PASS" : (wasTimeout ? "TIME" : "FAIL")) + " | " + descriptor.description);
+                    if (!descriptor.passed && descriptor.error != null && ! wasTimeout ) {
                         System.err.println("    " + descriptor.error.getMessage());
                     }
                     try {
