@@ -2,19 +2,19 @@ function testFailed(message) {
     $$$fail(message);
 }
 
-//function $PRINT(message) {
-//
-//}
-//
-//function $INCLUDE(message) { }
+function $PRINT(message) {
+  print(message);
+}
+
+function $INCLUDE(message) { }
 function $ERROR(message) {
     testFailed(message);
 }
-//
-//function $FAIL(message) {
-//    testFailed(message);
-//}
-//
+
+function $FAIL(message) {
+    testFailed(message);
+}
+
 function runTestCase(testcase) {
     var x = testcase();
     //print(x);
@@ -173,3 +173,42 @@ function accessorPropertyAttributesAreCorrect(obj,
 
 var NotEarlyErrorString = "NotEarlyError";
 var NotEarlyError = new Error(NotEarlyErrorString);
+
+//Sputnik library definitions
+//Ultimately these should be namespaced some how and only made
+//available to tests that explicitly include them.
+//For now, we just define the globally
+//
+// TODO: Mayhap we turn these puppies into modules (LB)
+
+//math_precision.js
+// Copyright 2009 the Sputnik authors.  All rights reserved.
+// This code is governed by the BSD license found in the LICENSE file.
+
+function getPrecision(num) {
+    //TODO: Create a table of prec's,
+    //      because using Math for testing Math isn't that correct.
+
+    var log2num = Math.log(Math.abs(num)) / Math.LN2;
+    var pernum = Math.ceil(log2num);
+    return (2 * Math.pow(2, -52 + pernum));
+    //return(0);
+}
+
+//math_isequal.js
+// Copyright 2009 the Sputnik authors.  All rights reserved.
+// This code is governed by the BSD license found in the LICENSE file.
+
+var prec;
+function isEqual(num1, num2) {
+    if ((num1 === Infinity) && (num2 === Infinity)) {
+        return (true);
+    }
+    if ((num1 === -Infinity) && (num2 === -Infinity)) {
+        return (true);
+    }
+    prec = getPrecision(Math.min(Math.abs(num1), Math.abs(num2)));
+    return (Math.abs(num1 - num2) <= prec);
+    //return(num1 === num2);
+}
+
