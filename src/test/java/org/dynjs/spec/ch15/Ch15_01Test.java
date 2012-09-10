@@ -1,4 +1,4 @@
-package org.dynjs.spec;
+package org.dynjs.spec.ch15;
 
 import org.dynjs.spec.runner.SpecTestHelper;
 
