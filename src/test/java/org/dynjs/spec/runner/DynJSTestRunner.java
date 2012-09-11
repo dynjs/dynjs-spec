@@ -125,7 +125,11 @@ public class DynJSTestRunner extends Runner implements Filterable {
                             future.cancel(true);
                             throw e;
                         }
+                        if ( descriptor.isNegative ) {
+                            notifier.fireTestFailure(new Failure( description, new AssertionError("should have thrown: " + descriptor.negativeExpectation) ) );
+                        } else {
                         notifier.fireTestFinished(description);
+                        }
                         descriptor.passed = true;
                     } catch (Throwable e) {
                         if (!descriptor.isNegative) {
