@@ -57,6 +57,7 @@ public class DynJSTestRunner extends Runner implements Filterable {
     private static List<String> SKIP_TESTS = new ArrayList<String>() {
         {
             add("S15.4.5.2_A3_T4.js");
+            add("S15.1.3.1_A2.5_T1.js");
         }
     };
 
