@@ -1,6 +1,6 @@
 package org.dynjs.spec.shims;
 
-import org.dynjs.exception.DynJSException;
+import org.dynjs.exception.ThrowException;
 import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.ExecutionContext;
 import org.dynjs.runtime.GlobalObject;
@@ -13,6 +13,6 @@ public class FailShim extends AbstractNativeFunction {
 
     @Override
     public Object call(ExecutionContext context, Object self, Object... args) {
-        throw new DynJSException(args.length == 1 ? args[0].toString() : "failed");
+        throw new ThrowException(context, context.createError("Error", args.length == 1 ? args[0].toString() : "test failure"));
     }
 }
