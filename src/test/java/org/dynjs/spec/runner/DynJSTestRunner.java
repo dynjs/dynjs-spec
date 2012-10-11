@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -228,6 +229,7 @@ public class DynJSTestRunner extends Runner implements Filterable {
 
     private DynJS createDynJSRuntime() {
         Config config = new Config();
+        config.setTimeZone( TimeZone.getTimeZone( "America/Los_Angeles"));
         config.setGlobalObjectFactory(new GlobalObjectFactory() {
             @Override
             public GlobalObject newGlobalObject(DynJS runtime) {
