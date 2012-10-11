@@ -6,7 +6,9 @@ function $PRINT(message) {
   print(message);
 }
 
-function $INCLUDE(message) { }
+function $INCLUDE(file) { 
+  include( 'src/test/resources/harness/' + file );
+}
 function $ERROR(message) {
     testFailed(message);
 }
