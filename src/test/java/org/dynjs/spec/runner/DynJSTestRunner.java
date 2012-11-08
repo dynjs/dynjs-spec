@@ -94,7 +94,8 @@ public class DynJSTestRunner extends Runner implements Filterable {
 
     @Override
     public void run(RunNotifier notifier) {
-        final ExecutorService service = Executors.newSingleThreadExecutor();
+        //final ExecutorService service = Executors.newSingleThreadExecutor();
+        final ExecutorService service = Executors.newFixedThreadPool(20);
         for (final File file : files) {
             final Description description = Description.createTestDescription(testClass, file.getName());
             notifier.fireTestStarted(description);
