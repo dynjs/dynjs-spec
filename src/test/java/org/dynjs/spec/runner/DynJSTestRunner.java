@@ -94,7 +94,7 @@ public class DynJSTestRunner extends Runner implements Filterable {
 
     @Override
     public void run(RunNotifier notifier) {
-        //final ExecutorService service = Executors.newSingleThreadExecutor();
+        // final ExecutorService service = Executors.newSingleThreadExecutor();
         final ExecutorService service = Executors.newFixedThreadPool(20);
         for (final File file : files) {
             final Description description = Description.createTestDescription(testClass, file.getName());
@@ -128,12 +128,13 @@ public class DynJSTestRunner extends Runner implements Filterable {
                             future.cancel(true);
                             throw e;
                         }
-                        if ( descriptor.isNegative ) {
-                            notifier.fireTestFailure(new Failure( description, new AssertionError("should have thrown: " + descriptor.negativeExpectation) ) );
+                        if (descriptor.isNegative) {
+                            descriptor.passed = false;
+                            notifier.fireTestFailure(new Failure(description, new AssertionError("should have thrown: " + descriptor.negativeExpectation)));
                         } else {
-                        notifier.fireTestFinished(description);
+                            descriptor.passed = true;
+                            notifier.fireTestFinished(description);
                         }
-                        descriptor.passed = true;
                     } catch (Throwable e) {
                         if (!descriptor.isNegative) {
                             notifier.fireTestFailure(new Failure(description, e));
@@ -230,7 +231,7 @@ public class DynJSTestRunner extends Runner implements Filterable {
 
     private DynJS createDynJSRuntime() {
         Config config = new Config();
-        config.setTimeZone( TimeZone.getTimeZone( "America/Los_Angeles"));
+        config.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles"));
         config.setGlobalObjectFactory(new GlobalObjectFactory() {
             @Override
             public GlobalObject newGlobalObject(DynJS runtime) {
