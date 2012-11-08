@@ -50,7 +50,7 @@ import org.junit.runner.notification.RunNotifier;
 
 public class DynJSTestRunner extends Runner implements Filterable {
 
-    public static final int TIMEOUT_IN_SECONDS = 15;
+    public static final int TIMEOUT_IN_SECONDS = 30;
     private final Class<?> testClass;
     private Collection<File> files = new ArrayList<>();
     private Collection<File> filesToPreload;
