@@ -110,7 +110,9 @@ public class DynJSTestRunner extends Runner implements Filterable {
                         try {
                             for (File fileToPreload : filesToPreload) {
                                 FileInputStream stream = new FileInputStream(fileToPreload);
-                                dynJS.execute(stream, file.getName());
+                                dynJS.newRunner()
+                                        .withSource(fileToPreload)
+                                        .execute();
                                 stream.close();
                             }
                         } catch (Exception e) {
@@ -119,9 +121,8 @@ public class DynJSTestRunner extends Runner implements Filterable {
                             descriptor.error = e;
                             continue;
                         }
-                        testFile = new FileInputStream(file);
                         System.err.print(String.format("%-25s", file.getName()) + " | ");
-                        final Future<Object> future = service.submit(new TestTask(dynJS, testFile, file, descriptor.onlyStrict));
+                        final Future<Object> future = service.submit(new TestTask(dynJS, file, descriptor.onlyStrict));
                         try {
                             future.get(TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
                         } catch (TimeoutException e) {
@@ -258,20 +259,21 @@ public class DynJSTestRunner extends Runner implements Filterable {
 
     private static class TestTask implements Callable<Object> {
         private final DynJS dynJS;
-        private final FileInputStream testFile;
         private final File file;
         private boolean forceStrict;
 
-        public TestTask(DynJS dynJS, FileInputStream testFile, File file, boolean forceStrict) {
+        public TestTask(DynJS dynJS, File file, boolean forceStrict) {
             this.dynJS = dynJS;
-            this.testFile = testFile;
             this.file = file;
             this.forceStrict = forceStrict;
         }
 
         @Override
         public Object call() throws Exception {
-            dynJS.execute(testFile, file.getName(), forceStrict);
+            dynJS.newRunner()
+                    .withSource(file)
+                    .forceStrict(forceStrict)
+                    .execute();
             return null;
         }
     }
