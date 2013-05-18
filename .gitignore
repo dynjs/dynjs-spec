@@ -5,3 +5,8 @@
 .classpath
 .project
 .settings
+.idea/
+*.iml
+
+# misc files
+*.log
