@@ -1,0 +1,12 @@
+language: java
+jdk:
+  - oraclejdk7
+  - openjdk7
+env:
+  - MODE=off
+  - MODE=jit
+#  - MODE=force
+install: mvn install -s support/settings.xml -DskipTests=true -P,-version
+script: mvn test -Ddynjs.compile.mode=$MODE -s support/settings.xml -P,-version
+notifications:
+  irc: "irc.freenode.org#dynjs"
