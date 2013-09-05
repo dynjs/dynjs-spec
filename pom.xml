@@ -17,7 +17,7 @@
         <repository>
             <id>dynjs-snapshot</id>
             <name>dynjs snapshot Builds</name>
-            <url>https://repository-dynjs.forge.cloudbees.com/snapshot</url>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
             <layout>default</layout>
             <releases>
                 <enabled>false</enabled>
