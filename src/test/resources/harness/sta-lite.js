@@ -229,3 +229,39 @@ function fnExists(/*arguments*/) {
     }
     return true;
 }
+
+//-----------------------------------------------------------------------------
+function compareArray(aExpected, aActual) {
+    if (aActual.length != aExpected.length) {
+        return false;
+    }
+
+    aExpected.sort();
+    aActual.sort();
+
+    var s;
+    for (var i = 0; i < aExpected.length; i++) {
+        if (aActual[i] !== aExpected[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+function arrayContains(arr, expected) {
+    var found;
+    for (var i = 0; i < expected.length; i++) {
+        found = false;
+        for (var j = 0; j < arr.length; j++) {
+            if (expected[i] === arr[j]) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            return false;
+        }
+    }
+    return true;
+}
