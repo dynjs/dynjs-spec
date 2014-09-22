@@ -33,7 +33,7 @@
         <dependency>
             <groupId>org.dynjs</groupId>
             <artifactId>dynjs</artifactId>
-            <version>0.2.3-SNAPSHOT</version>
+            <version>0.3.1-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -52,6 +52,12 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.1</version>
+        </dependency>
+        <dependency>
+          <groupId>org.easytesting</groupId>
+          <artifactId>fest-assert</artifactId>
+          <version>1.4</version>
+          <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
