@@ -3,12 +3,12 @@ package org.dynjs.spec.shims;
 import org.dynjs.exception.ThrowException;
 import org.dynjs.runtime.AbstractNativeFunction;
 import org.dynjs.runtime.ExecutionContext;
-import org.dynjs.runtime.GlobalObject;
+import org.dynjs.runtime.GlobalContext;
 
 public class FailShim extends AbstractNativeFunction {
 
-    public FailShim(GlobalObject globalObject) {
-        super(globalObject, "message");
+    public FailShim(GlobalContext globalContext) {
+        super(globalContext, "message");
     }
 
     @Override

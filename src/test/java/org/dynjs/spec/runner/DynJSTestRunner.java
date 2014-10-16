@@ -37,8 +37,7 @@ import java.util.regex.Pattern;
 
 import org.dynjs.Config;
 import org.dynjs.runtime.DynJS;
-import org.dynjs.runtime.GlobalObject;
-import org.dynjs.runtime.GlobalObjectFactory;
+import org.dynjs.runtime.GlobalContext;
 import org.dynjs.spec.shims.FailShim;
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
@@ -233,15 +232,10 @@ public class DynJSTestRunner extends Runner implements Filterable {
     private DynJS createDynJSRuntime() {
         Config config = new Config();
         config.setTimeZone(TimeZone.getTimeZone("America/Los_Angeles"));
-        config.setGlobalObjectFactory(new GlobalObjectFactory() {
-            @Override
-            public GlobalObject newGlobalObject(DynJS runtime) {
-                final GlobalObject global = new GlobalObject(runtime);
-                global.defineGlobalProperty("$$$fail", new FailShim(global));
-                return global;
-            }
-        });
-        return new DynJS(config);
+        DynJS dynJS = new DynJS(config);
+        GlobalContext globalContext = dynJS.getGlobalContext();
+        globalContext.defineNonEnumerableProperty(globalContext, "$$$fail", new FailShim(globalContext));
+        return dynJS;
     }
 
     @Override
